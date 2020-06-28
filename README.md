@@ -1,16 +1,13 @@
-# meals_app
+# Meals App
 
 A new Flutter project.
 
-## Getting Started
+## Deskripsi
 
-This project is a starting point for a Flutter application.
+Adalah sebuah aplikasi yang mirip seperti buku memasak, ada banyak makanan-makanan dari berbagai negara dan bermacam kategori. Ada juga penjelasan tentang cara membuat makanan-makanan tersebut, bahkan ada juga yang berupa video. Berikut tampilan aplikasinya :
 
-A few resources to get you started if this is your first Flutter project:
+![final1](https://user-images.githubusercontent.com/54944887/85939257-146cb180-b93e-11ea-87c4-487c101c207f.png)
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 
+![final2](https://user-images.githubusercontent.com/54944887/85939260-16cf0b80-b93e-11ea-9a2f-bb9c637ad50d.png) 
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![final3](https://user-images.githubusercontent.com/54944887/85939262-1898cf00-b93e-11ea-88fb-457e6f7cb886.gif)
