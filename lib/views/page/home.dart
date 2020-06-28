@@ -1,8 +1,11 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:meals_app/models/areaModel.dart';
 import 'package:meals_app/models/categoriesModel.dart';
 import 'package:meals_app/models/mealsModel.dart';
+import 'package:meals_app/services/url.dart';
+import 'package:meals_app/utils/strings.dart';
 import 'package:meals_app/utils/textStyleCustom.dart';
 import 'package:meals_app/viewModels/homeViewModel.dart';
 import 'package:meals_app/views/page/detailMeals.dart';
@@ -94,6 +97,10 @@ class _HomeState extends State<Home> {
 
   DropdownButton<String> buildDropdown(
       HomeViewModel model, List<AreaMeal> areaMeal) {
+    UrlApi urlApi = UrlApi();
+    StringCustom stringCustom = StringCustom();
+    int index = 0;
+
     return DropdownButton(
       icon: Icon(MaterialIcons.keyboard_arrow_down),
       underline: Container(),
@@ -102,8 +109,27 @@ class _HomeState extends State<Home> {
       hint: Text("Select Area"),
       value: model.areaValue,
       items: areaMeal?.map((f) {
+        index++;
         return DropdownMenuItem(
-          child: Text(f.strArea),
+          child: Row(
+            children: <Widget>[
+              (stringCustom.countryCode[index - 1] == 'unknown')
+                  ? Icon(AntDesign.question)
+                  : SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: BuildCachedImage(
+                        fit: BoxFit.contain,
+                        imgUrl: urlApi.areaImage +
+                            stringCustom.countryCode[index - 1] +
+                            ".png",
+                        isHome: false,
+                      ),
+                    ),
+              SizedBox(width: 5),
+              Text(f.strArea),
+            ],
+          ),
           value: f.strArea,
         );
       })?.toList(),
@@ -180,8 +206,9 @@ class _HomeState extends State<Home> {
                           onTap: () => Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  DetailMeal(id: meals.idMeal),
+                              builder: (context) => DetailMeal(
+                                  id: meals.idMeal,
+                                  areaMeal: model.area ?? null),
                             ),
                           ),
                           child: Card(
@@ -204,16 +231,14 @@ class _HomeState extends State<Home> {
                                     isHome: true,
                                   ),
                                 ),
-                                SizedBox(height: 5),
+                                SizedBox(height: 10),
                                 Flexible(
-                                  child: Text(
+                                  child: AutoSizeText(
                                     meals.strMeal,
                                     style: textStyleCustom.text
                                         .copyWith(fontWeight: FontWeight.w600),
                                     textAlign: TextAlign.center,
-                                    softWrap: true,
-                                    maxLines: 3,
-                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
                                   ),
                                 )
                               ],
@@ -226,7 +251,7 @@ class _HomeState extends State<Home> {
                       child: Text(
                         "Not Found",
                         style: textStyleCustom.text.copyWith(
-                            fontWeight: FontWeight.w600, fontSize: 15),
+                            fontWeight: FontWeight.w400, fontSize: 15),
                       ),
                     ),
         ),
@@ -262,11 +287,13 @@ class _HomeState extends State<Home> {
                 width: 5,
               ),
               Flexible(
-                  child: Text(
-                category.strCategory,
-                style:
-                    textStyleCustom.text.copyWith(fontWeight: FontWeight.bold),
-              )),
+                child: AutoSizeText(
+                  category.strCategory,
+                  style: textStyleCustom.text
+                      .copyWith(fontWeight: FontWeight.bold),
+                  maxLines: 1,
+                ),
+              ),
             ],
           ),
         ),

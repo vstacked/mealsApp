@@ -16,6 +16,13 @@ class UrlApi {
       "https://pub.dev/packages/cached_network_image";
   final String flutterIcons = "https://pub.dev/packages/flutter_icons";
   final String urlLauncher = "https://pub.dev/packages/url_launcher";
+  final String autoSizeText = "https://pub.dev/packages/auto_size_text";
   final String museoModerno = "https://fonts.google.com/specimen/MuseoModerno";
   final String roboto = "https://fonts.google.com/specimen/Roboto";
+
+  final String areaImage =
+      "https://www.themealdb.com/images/icons/flags/big/64/";
+  final String categoryImage = "https://www.themealdb.com/images/category/";
+  final String ingredientsImage =
+      "https://www.themealdb.com/images/ingredients/";
 }

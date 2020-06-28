@@ -1,7 +1,9 @@
-import 'dart:math';
-
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:meals_app/models/areaModel.dart';
+import 'package:meals_app/services/url.dart';
+import 'package:meals_app/utils/strings.dart';
 import 'package:meals_app/utils/textStyleCustom.dart';
 import 'package:meals_app/viewModels/detailMealViewModel.dart';
 import 'package:meals_app/views/widgets/buildCachedImage.dart';
@@ -10,14 +12,16 @@ import 'package:url_launcher/url_launcher.dart';
 
 class DetailMeal extends StatefulWidget {
   final String id;
-  DetailMeal({@required this.id});
+  final List<AreaMeal> areaMeal;
+  DetailMeal({@required this.id, @required this.areaMeal});
   @override
   _DetailMealState createState() => _DetailMealState();
 }
 
 class _DetailMealState extends State<DetailMeal> {
   TextStyleCustom textStyleCustom = TextStyleCustom();
-  Random random = Random();
+  UrlApi urlApi = UrlApi();
+  StringCustom stringCustom = StringCustom();
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<DetailMealViewModel>.reactive(
@@ -27,6 +31,10 @@ class _DetailMealState extends State<DetailMeal> {
         var data = (!model.isLoad) ? model.mealsDetail[0] : null;
         List<String> ingredients = List();
         List<String> measure = List();
+        String countryCode = 'unknown';
+        List<String> country = widget.areaMeal?.map((f) {
+          return f.strArea;
+        })?.toList();
 
         if (data != null) {
           for (int i = 1; i <= 20; i++) {
@@ -35,6 +43,14 @@ class _DetailMealState extends State<DetailMeal> {
               ingredients.add(data['strIngredient$i']);
               measure.add(data['strMeasure$i']);
             }
+          }
+
+          int index = 0;
+          for (int i = 0; i < country.length; i++) {
+            if (country[i] == "${data['strArea']}") {
+              countryCode = stringCustom.countryCode[index];
+            }
+            index++;
           }
         }
 
@@ -53,7 +69,7 @@ class _DetailMealState extends State<DetailMeal> {
                           color: Colors.white54,
                         ),
                         child: IconButton(
-                          icon: Icon(FontAwesome.arrow_left),
+                          icon: Icon(Ionicons.md_arrow_round_back),
                           color: Colors.black87,
                           iconSize: 25.0,
                           onPressed: () => Navigator.pop(context),
@@ -64,24 +80,22 @@ class _DetailMealState extends State<DetailMeal> {
                       pinned: true,
                       flexibleSpace: FlexibleSpaceBar(
                         centerTitle: true,
+                        titlePadding: EdgeInsets.all(5),
                         title: Container(
                           decoration: BoxDecoration(
                             color: Colors.white54,
                           ),
                           child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: 250,
-                            ),
-                            child: Text(
+                            constraints: BoxConstraints(maxWidth: 200),
+                            child: AutoSizeText(
                               (data != null) ? data['strMeal'].toString() : "",
                               style: textStyleCustom.title.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black87,
                                 fontSize: 18.0,
                               ),
-                              maxLines: 1,
+                              maxLines: 2,
                               textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
@@ -111,7 +125,11 @@ class _DetailMealState extends State<DetailMeal> {
                                     children: <Widget>[
                                       buildSubTitle("Area"),
                                       SizedBox(height: 5),
-                                      buildSubValue("${data['strArea']}"),
+                                      buildSubValue(
+                                        "${data['strArea']}",
+                                        true,
+                                        countryCode,
+                                      ),
                                     ],
                                   ),
                                   Column(
@@ -119,7 +137,11 @@ class _DetailMealState extends State<DetailMeal> {
                                     children: <Widget>[
                                       buildSubTitle("Category"),
                                       SizedBox(height: 5),
-                                      buildSubValue("${data['strCategory']}"),
+                                      buildSubValue(
+                                        "${data['strCategory']}",
+                                        false,
+                                        "${data['strCategory']}",
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -130,7 +152,8 @@ class _DetailMealState extends State<DetailMeal> {
                                 children: <Widget>[
                                   buildSubTitle("Tags"),
                                   SizedBox(height: 5),
-                                  buildSubValue("${data['strTags']}"),
+                                  buildSubValue(
+                                      "${data['strTags']}", false, null),
                                 ],
                               ),
                               SizedBox(height: 20),
@@ -138,7 +161,7 @@ class _DetailMealState extends State<DetailMeal> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Container(
-                                  height: 75,
+                                  height: 65,
                                   width: MediaQuery.of(context).size.width,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
@@ -149,53 +172,55 @@ class _DetailMealState extends State<DetailMeal> {
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 8.0),
                                         child: Container(
-                                          height: 75,
-                                          width: 130,
+                                          width: 200,
                                           decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(30),
-                                              color: Color.fromRGBO(
-                                                  255,
-                                                  165 +
-                                                      random.nextInt(255 - 165),
-                                                  0,
-                                                  1)),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                            border: Border.all(
+                                              color: Colors.grey[300],
+                                              width: 1,
+                                            ),
+                                          ),
                                           child: ListTile(
-                                            title: Text(
+                                            leading: SizedBox(
+                                              height: 40,
+                                              width: 40,
+                                              child: BuildCachedImage(
+                                                fit: BoxFit.contain,
+                                                imgUrl:
+                                                    urlApi.ingredientsImage +
+                                                        ifAnySpace(
+                                                          ingredients
+                                                              .toList()[index]
+                                                              .toString(),
+                                                        ) +
+                                                        ".png",
+                                                isHome: false,
+                                              ),
+                                            ),
+                                            title: AutoSizeText(
                                               ingredients
                                                   .toList()[index]
                                                   .toString(),
                                               textAlign: TextAlign.center,
-                                              style: textStyleCustom.text
-                                                  .copyWith(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                      shadows: [
-                                                    Shadow(
-                                                      offset: Offset(0.2, 0.2),
-                                                      blurRadius: 2,
-                                                      color: Colors.black,
-                                                    )
-                                                  ]),
+                                              style:
+                                                  textStyleCustom.text.copyWith(
+                                                color: Colors.black45,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              maxLines: 1,
                                             ),
-                                            subtitle: Text(
+                                            subtitle: AutoSizeText(
                                               measure
                                                   .toList()[index]
                                                   .toString(),
                                               textAlign: TextAlign.center,
-                                              style: textStyleCustom.text
-                                                  .copyWith(
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      shadows: [
-                                                    Shadow(
-                                                      offset: Offset(0.2, 0.2),
-                                                      blurRadius: 2,
-                                                      color: Colors.black,
-                                                    )
-                                                  ]),
+                                              style:
+                                                  textStyleCustom.text.copyWith(
+                                                color: Colors.orange[200],
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                              maxLines: 1,
                                             ),
                                           ),
                                         ),
@@ -206,10 +231,13 @@ class _DetailMealState extends State<DetailMeal> {
                               ),
                               SizedBox(height: 20),
                               buildTitle("Instructions"),
-                              SizedBox(height: 5),
+                              SizedBox(height: 10),
                               Text(
                                 data['strInstructions'],
-                                style: textStyleCustom.text,
+                                style: textStyleCustom.text.copyWith(
+                                  fontSize: 14,
+                                  color: Colors.black45,
+                                ),
                                 textAlign: TextAlign.justify,
                               ),
                               SizedBox(height: 20),
@@ -224,11 +252,14 @@ class _DetailMealState extends State<DetailMeal> {
                                   ),
                                 ),
                               ),
+                              SizedBox(height: 20),
                             ],
                           ),
                         ),
                       )
-                    : Container(),
+                    : Center(
+                        child: CircularProgressIndicator(),
+                      ),
               ),
             ));
       },
@@ -239,20 +270,46 @@ class _DetailMealState extends State<DetailMeal> {
     return Text(
       text,
       style: textStyleCustom.text.copyWith(
-        fontWeight: FontWeight.w800,
-        fontSize: 18,
+        fontWeight: FontWeight.w500,
+        fontSize: 16,
       ),
     );
   }
 
-  Text buildSubValue(String text) {
-    return Text(
-      text,
-      style: textStyleCustom.text.copyWith(
-        fontWeight: FontWeight.w600,
-        fontSize: 16,
-      ),
+  Widget buildSubValue(String text, bool isArea, String value) {
+    return Row(
+      children: <Widget>[
+        (value != null)
+            ? (value == 'unknown')
+                ? Icon(AntDesign.question)
+                : SizedBox(
+                    height: 40,
+                    width: 40,
+                    child: BuildCachedImage(
+                      fit: BoxFit.contain,
+                      imgUrl:
+                          ((isArea) ? urlApi.areaImage : urlApi.categoryImage) +
+                              ifAnySpace(value) +
+                              ".png",
+                      isHome: false,
+                    ),
+                  )
+            : Container(),
+        SizedBox(width: 5),
+        AutoSizeText(
+          text,
+          style: textStyleCustom.text.copyWith(
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+          ),
+          maxLines: 1,
+        ),
+      ],
     );
+  }
+
+  String ifAnySpace(String value) {
+    return (value.contains(" ")) ? value.replaceAll(" ", "%20") : value;
   }
 
   Text buildSubTitle(String text) {

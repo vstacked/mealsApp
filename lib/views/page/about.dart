@@ -120,6 +120,10 @@ class _AboutState extends State<About> {
                     onTap: () => _launchURL(urlApi.urlLauncher),
                     child: buildTextLink("url_launcher"),
                   ),
+                  GestureDetector(
+                    onTap: () => _launchURL(urlApi.autoSizeText),
+                    child: buildTextLink("auto_size_text"),
+                  ),
                   SizedBox(height: 15),
                   buildSubTitle("Fonts :"),
                   GestureDetector(
