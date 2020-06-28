@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:meals_app/models/areaModel.dart';
 import 'package:meals_app/models/categoriesModel.dart';
 import 'package:meals_app/models/mealsModel.dart';
+import 'package:meals_app/utils/textStyleCustom.dart';
 import 'package:meals_app/viewModels/homeViewModel.dart';
 import 'package:meals_app/views/page/detailMeals.dart';
 import 'package:meals_app/views/widgets/buildCachedImage.dart';
@@ -17,6 +19,7 @@ class _HomeState extends State<Home> {
   bool isClicked = false;
   TextEditingController searchController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  TextStyleCustom textStyleCustom = TextStyleCustom();
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeViewModel>.reactive(
@@ -25,6 +28,7 @@ class _HomeState extends State<Home> {
       builder: (context, model, child) {
         List<AreaMeal> areaMeal = model.area ?? null;
         return Scaffold(
+          backgroundColor: Colors.white,
           key: _scaffoldKey,
           resizeToAvoidBottomInset: false,
           drawer: BuildDrawer(
@@ -32,8 +36,12 @@ class _HomeState extends State<Home> {
             about: false,
           ),
           appBar: AppBar(
+            elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.menu),
+              icon: Icon(
+                Ionicons.md_list,
+                color: Colors.black,
+              ),
               onPressed: () => _scaffoldKey.currentState.openDrawer(),
             ),
             title: (isClicked)
@@ -42,7 +50,10 @@ class _HomeState extends State<Home> {
             centerTitle: true,
             actions: <Widget>[
               IconButton(
-                icon: Icon((isClicked) ? Icons.close : Icons.search),
+                icon: Icon(
+                  (isClicked) ? MaterialIcons.close : MaterialIcons.search,
+                  color: Colors.black,
+                ),
                 onPressed: () {
                   searchController.clear();
                   setState(() {
@@ -71,12 +82,23 @@ class _HomeState extends State<Home> {
         model.getDataFromApi;
       },
       textInputAction: TextInputAction.search,
+      cursorColor: Colors.orange[300],
+      style: textStyleCustom.text.copyWith(color: Colors.black),
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hintText: 'Search..',
+        hintStyle: textStyleCustom.text,
+      ),
     );
   }
 
   DropdownButton<String> buildDropdown(
       HomeViewModel model, List<AreaMeal> areaMeal) {
     return DropdownButton(
+      icon: Icon(MaterialIcons.keyboard_arrow_down),
+      underline: Container(),
+      style: textStyleCustom.text.copyWith(color: Colors.black),
+      elevation: 2,
       hint: Text("Select Area"),
       value: model.areaValue,
       items: areaMeal?.map((f) {
@@ -97,8 +119,24 @@ class _HomeState extends State<Home> {
     return Column(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text("Meals App"),
+          padding: const EdgeInsets.all(10.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "TheMealDB",
+                  style: textStyleCustom.title
+                      .copyWith(fontSize: 35, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "Food that meets your needs",
+                  style: textStyleCustom.title,
+                ),
+              ],
+            ),
+          ),
         ),
         Expanded(
           flex: 1,
@@ -108,7 +146,7 @@ class _HomeState extends State<Home> {
             itemBuilder: (BuildContext context, int index) {
               Category category = model.categories[index];
               return Center(
-                child: InkWell(
+                child: GestureDetector(
                   onTap: () {
                     model.setCategory(category.strCategory);
                     model.setAreaValue(null);
@@ -117,9 +155,9 @@ class _HomeState extends State<Home> {
                   },
                   child: (model.category == category.strCategory)
                       ? (model.areaValue == null && model.searchValue == null)
-                          ? buildCategory(category, Colors.orange)
-                          : buildCategory(category, Colors.grey)
-                      : buildCategory(category, Colors.grey),
+                          ? buildCategory(category, Colors.orange[200])
+                          : buildCategory(category, Colors.grey[100])
+                      : buildCategory(category, Colors.grey[100]),
                 ),
               );
             },
@@ -147,46 +185,91 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                           child: Card(
-                            color: Colors.white,
+                            color: Colors.grey[100],
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
                             margin: EdgeInsets.all(4).copyWith(
                                 top: (index % 2 == 1) ? 30 : 4,
                                 bottom: (index % 2 == 1) ? 4 : 30),
                             child: Column(
                               children: <Widget>[
                                 SizedBox(
-                                  height: 100,
-                                  width: 100,
+                                  height: 150,
+                                  width: double.infinity,
                                   child: BuildCachedImage(
                                     imgUrl: meals.strMealThumb,
+                                    fit: BoxFit.fill,
+                                    isHome: true,
                                   ),
                                 ),
-                                Text(meals.strMeal)
+                                SizedBox(height: 5),
+                                Flexible(
+                                  child: Text(
+                                    meals.strMeal,
+                                    style: textStyleCustom.text
+                                        .copyWith(fontWeight: FontWeight.w600),
+                                    textAlign: TextAlign.center,
+                                    softWrap: true,
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                )
                               ],
                             ),
                           ),
                         );
                       },
                     )
-                  : Text("data Tidak Ada"),
+                  : Center(
+                      child: Text(
+                        "Not Found",
+                        style: textStyleCustom.text.copyWith(
+                            fontWeight: FontWeight.w600, fontSize: 15),
+                      ),
+                    ),
         ),
       ],
     );
   }
 
-  Container buildCategory(Category category, Color color) {
-    return Container(
-      height: 50,
-      width: 100,
-      color: color,
-      child: Row(
-        children: <Widget>[
-          SizedBox(
-            height: 50,
-            width: 50,
-            child: BuildCachedImage(imgUrl: category.strCategoryThumb),
+  Widget buildCategory(Category category, Color color) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 50,
+        width: 130,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(30),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                height: 50,
+                width: 50,
+                child: BuildCachedImage(
+                  imgUrl: category.strCategoryThumb,
+                  fit: BoxFit.contain,
+                  isHome: false,
+                ),
+              ),
+              SizedBox(
+                width: 5,
+              ),
+              Flexible(
+                  child: Text(
+                category.strCategory,
+                style:
+                    textStyleCustom.text.copyWith(fontWeight: FontWeight.bold),
+              )),
+            ],
           ),
-          Text(category.strCategory),
-        ],
+        ),
       ),
     );
   }

@@ -15,11 +15,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Meals App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData().copyWith(
+        primaryColor: Colors.white,
+        accentColor: Colors.orange[200],
       ),
       home: Home(),
     );
   }
 }
-// ThemeData().copyWith primary accent
